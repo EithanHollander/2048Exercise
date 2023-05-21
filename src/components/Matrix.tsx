@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import matrixStore from "../stores/MatrixStore";
 import styled from "styled-components";
+import "./Matrix.css";
 
 interface KeyboardEvent {
   key: string;
@@ -13,8 +14,15 @@ const Container = styled.div`
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  height: 410px;
-  width: 410px;
+  color: #776e65;
+  background: #bbad9f;
+  border-radius: 6px;
+  width: 500px;
+  height: 500px;
+
+  :last-child {
+    margin-bottom: 0px;
+  }
 `;
 
 const Row = styled.div`
@@ -22,19 +30,29 @@ const Row = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  margin-bottom: 15px;
+
+  :last-child {
+    margin-right: 0px;
+  }
 `;
 
 const Cell = styled.div`
-  border: solid black 1px;
-  height: 100px;
-  width: 100px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 35px;
+  width: 106.25px;
+  height: 106.25px;
+  border-radius: 3px;
+  font-weight: bold;
+  margin-right: 15px;
 `;
 
-const Matrix = observer(() => {
+type MatrixProps = {
+  className?: string;
+};
+
+const Matrix = observer((props: MatrixProps) => {
   useEffect(() => {
     matrixStore.init();
   }, []);
@@ -64,14 +82,16 @@ const Matrix = observer(() => {
   }, []);
 
   return (
-    <Container>
+    <Container className={props.className}>
       {matrixStore.board.map((row, rowIndex) => {
         return (
           <Row key={rowIndex}>
             {row.map((cellValue, columnIndex) => {
               return (
-                <Cell key={columnIndex}>
-                  {cellValue === 0 ? null : cellValue}
+                <Cell className={"cell cell-" + cellValue} key={columnIndex}>
+                  {matrixStore.isCellEmpty(rowIndex, columnIndex)
+                    ? null
+                    : cellValue}
                 </Cell>
               );
             })}

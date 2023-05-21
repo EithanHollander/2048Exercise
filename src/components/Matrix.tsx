@@ -89,7 +89,7 @@ const Matrix = observer((props: MatrixProps) => {
             {row.map((cellValue, columnIndex) => {
               return (
                 <Cell className={"cell cell-" + cellValue} key={columnIndex}>
-                  {matrixStore.isCellEmpty(rowIndex, columnIndex)
+                  {matrixStore.isCellEmptyByCoordinate(rowIndex, columnIndex)
                     ? null
                     : cellValue}
                 </Cell>

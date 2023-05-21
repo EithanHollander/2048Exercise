@@ -2,6 +2,7 @@ import { makeAutoObservable } from "mobx";
 
 const MATRIX_SIZE = 4;
 const MAX_CELL_VALUE = 2048;
+const CELL_EMPTY_VALUE = 0;
 
 const getRandomNumber = (max: number): number => {
   return Math.floor(Math.random() * max);
@@ -33,14 +34,14 @@ class MatrixStore {
   constructor() {
     makeAutoObservable(this);
     this.board = Array(MATRIX_SIZE)
-      .fill(0)
+      .fill(CELL_EMPTY_VALUE)
       .map((_row) => new Array(MATRIX_SIZE).fill(0));
     this.triedToAddToFullBoard = false;
   }
 
   init() {
     this.board = Array(MATRIX_SIZE)
-      .fill(0)
+      .fill(CELL_EMPTY_VALUE)
       .map((_row) => new Array(MATRIX_SIZE).fill(0));
     this.triedToAddToFullBoard = false;
 
@@ -63,15 +64,19 @@ class MatrixStore {
     return maxNumberExists || this.triedToAddToFullBoard;
   }
 
-  isCellEmpty(row: number, column: number) {
-    return this.board[row][column] === 0;
+  isCellEmptyByCoordinate(row: number, column: number) {
+    return this.board[row][column] === CELL_EMPTY_VALUE;
+  }
+
+  isCellEmptyByValue(cellValue: number) {
+    return cellValue === CELL_EMPTY_VALUE;
   }
 
   chooseRandomEmptyCell() {
     const emptyCells: Coordinate[] = [];
     for (let i = 0; i < MATRIX_SIZE; i++) {
       for (let j = 0; j < MATRIX_SIZE; j++) {
-        if (this.isCellEmpty(i, j)) {
+        if (this.isCellEmptyByCoordinate(i, j)) {
           emptyCells.push({ row: i, column: j });
         }
       }
@@ -99,22 +104,22 @@ class MatrixStore {
     for (let row = 0; row < MATRIX_SIZE; row++) {
       // get this row's values
       const nettoRowValues = this.board[row].filter(
-        (_cell, index) => !this.isCellEmpty(row, index)
+        (cellValue) => !this.isCellEmptyByValue(cellValue)
       );
       // put all values at the right
       this.board[row].fill(0);
-      for (
-        let insertCounter = 0;
-        insertCounter < nettoRowValues.length;
-        insertCounter++
-      ) {
-        this.board[row][MATRIX_SIZE - insertCounter - 1] =
-          nettoRowValues[nettoRowValues.length - insertCounter - 1];
-      }
+      this.board[row].splice(
+        MATRIX_SIZE - nettoRowValues.length,
+        nettoRowValues.length,
+        ...nettoRowValues
+      );
 
       // join matching cells
       let currentColumn = MATRIX_SIZE - 1;
-      while (currentColumn > 0 && !this.isCellEmpty(row, currentColumn - 1)) {
+      while (
+        currentColumn > 0 &&
+        !this.isCellEmptyByCoordinate(row, currentColumn - 1)
+      ) {
         if (
           this.board[row][currentColumn] === this.board[row][currentColumn - 1]
         ) {
@@ -143,22 +148,17 @@ class MatrixStore {
     for (let row = 0; row < MATRIX_SIZE; row++) {
       // get this row's values
       const nettoRowValues = this.board[row].filter(
-        (_cell, index) => !this.isCellEmpty(row, index)
+        (cellValue) => !this.isCellEmptyByValue(cellValue)
       );
       // put all values at the left
       this.board[row].fill(0);
-      for (
-        let insertCounter = 0;
-        insertCounter < nettoRowValues.length;
-        insertCounter++
-      ) {
-        this.board[row][insertCounter] = nettoRowValues[insertCounter];
-      }
+      this.board[row].splice(0, nettoRowValues.length, ...nettoRowValues);
+
       // join matching cells
       let currentColumn = 0;
       while (
         currentColumn < MATRIX_SIZE - 1 &&
-        !this.isCellEmpty(row, currentColumn + 1)
+        !this.isCellEmptyByCoordinate(row, currentColumn + 1)
       ) {
         if (
           this.board[row][currentColumn] === this.board[row][currentColumn + 1]
@@ -186,29 +186,25 @@ class MatrixStore {
     if (this.isGameOver) return;
     for (let column = 0; column < MATRIX_SIZE; column++) {
       // get this column's values
-      let nettoColumnValues: number[] = [];
-      for (let row = 0; row < MATRIX_SIZE; row++) {
-        if (!this.isCellEmpty(row, column)) {
-          nettoColumnValues.push(this.board[row][column]);
-        }
-      }
-
+      const nettoColumnValues: number[] = this.board
+        .map((row) => row[column])
+        .filter((cellValue) => !this.isCellEmptyByValue(cellValue));
       // put all values at the bottom
-      for (let row = 0; row < MATRIX_SIZE; row++) {
-        this.board[row][column] = 0;
-      }
-      for (
-        let insertCounter = 0;
-        insertCounter < nettoColumnValues.length;
-        insertCounter++
-      ) {
-        this.board[MATRIX_SIZE - insertCounter - 1][column] =
-          nettoColumnValues[nettoColumnValues.length - insertCounter - 1];
-      }
+      const amountOfEmptyCells = MATRIX_SIZE - nettoColumnValues.length;
+      this.board.forEach((row, rowIndex) => {
+        if (rowIndex < amountOfEmptyCells) {
+          row[column] = CELL_EMPTY_VALUE;
+        } else {
+          row[column] = nettoColumnValues[rowIndex - amountOfEmptyCells];
+        }
+      });
 
       // join matching cells
       let currentRow = MATRIX_SIZE - 1;
-      while (currentRow > 0 && !this.isCellEmpty(currentRow - 1, column)) {
+      while (
+        currentRow > 0 &&
+        !this.isCellEmptyByCoordinate(currentRow - 1, column)
+      ) {
         if (
           this.board[currentRow][column] === this.board[currentRow - 1][column]
         ) {
@@ -235,30 +231,23 @@ class MatrixStore {
     if (this.isGameOver) return;
     for (let column = 0; column < MATRIX_SIZE; column++) {
       // get this column's values
-      let nettoColumnValues: number[] = [];
-      for (let row = 0; row < MATRIX_SIZE; row++) {
-        if (!this.isCellEmpty(row, column)) {
-          nettoColumnValues.push(this.board[row][column]);
-        }
-      }
-
+      const nettoColumnValues: number[] = this.board
+        .map((row) => row[column])
+        .filter((cellValue) => !this.isCellEmptyByValue(cellValue));
       // put all values at the top
-      for (let row = 0; row < MATRIX_SIZE; row++) {
-        this.board[row][column] = 0;
-      }
-      for (
-        let insertCounter = 0;
-        insertCounter < nettoColumnValues.length;
-        insertCounter++
-      ) {
-        this.board[insertCounter][column] = nettoColumnValues[insertCounter];
-      }
+      this.board.forEach((row, rowIndex) => {
+        if (rowIndex < nettoColumnValues.length) {
+          row[column] = nettoColumnValues[rowIndex];
+        } else {
+          row[column] = CELL_EMPTY_VALUE;
+        }
+      });
 
       // join matching cells
       let currentRow = 0;
       while (
         currentRow < MATRIX_SIZE - 1 &&
-        !this.isCellEmpty(currentRow + 1, column)
+        !this.isCellEmptyByCoordinate(currentRow + 1, column)
       ) {
         if (
           this.board[currentRow][column] === this.board[currentRow + 1][column]

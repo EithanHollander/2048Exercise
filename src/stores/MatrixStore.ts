@@ -84,26 +84,106 @@ class MatrixStore {
   }
 
   moveRight() {
-    //logic
     console.log("move right!");
+    //shift cells
+    for (let row = 0; row < MATRIX_SIZE; row++) {
+      // get this row's values
+      const nettoRowValues = this.board[row].filter(
+        (_cell, index) => !this.isCellEmpty(row, index)
+      );
+      // put all values at the right
+      this.board[row].fill(0);
+      for (
+        let insertCounter = 0;
+        insertCounter < nettoRowValues.length;
+        insertCounter++
+      ) {
+        this.board[row][MATRIX_SIZE - insertCounter - 1] =
+          nettoRowValues[nettoRowValues.length - insertCounter - 1];
+      }
+    }
+
+    //join cells
     this.dropAnotherNumber();
   }
 
   moveLeft() {
-    //logic
     console.log("move left!");
+
+    //shift cells
+    for (let row = 0; row < MATRIX_SIZE; row++) {
+      // get this row's values
+      const nettoRowValues = this.board[row].filter(
+        (_cell, index) => !this.isCellEmpty(row, index)
+      );
+      // put all values at the left
+      this.board[row].fill(0);
+      for (
+        let insertCounter = 0;
+        insertCounter < nettoRowValues.length;
+        insertCounter++
+      ) {
+        this.board[row][insertCounter] = nettoRowValues[insertCounter];
+      }
+    }
+
+    //join cells
     this.dropAnotherNumber();
   }
 
   moveDown() {
-    //logic
     console.log("move down!");
+
+    //shift cells
+    for (let column = 0; column < MATRIX_SIZE; column++) {
+      let nettoColumnValues: number[] = [];
+      for (let row = 0; row < MATRIX_SIZE; row++) {
+        if (!this.isCellEmpty(row, column)) {
+          nettoColumnValues.push(this.board[row][column]);
+        }
+      }
+      for (let row = 0; row < MATRIX_SIZE; row++) {
+        this.board[row][column] = 0;
+      }
+
+      for (
+        let insertCounter = 0;
+        insertCounter < nettoColumnValues.length;
+        insertCounter++
+      ) {
+        this.board[MATRIX_SIZE - insertCounter - 1][column] =
+          nettoColumnValues[nettoColumnValues.length - insertCounter - 1];
+      }
+    }
+
+    //join cells
     this.dropAnotherNumber();
   }
 
   moveUp() {
-    //logic
     console.log("move up!");
+    //shift cells
+    for (let column = 0; column < MATRIX_SIZE; column++) {
+      let nettoColumnValues: number[] = [];
+      for (let row = 0; row < MATRIX_SIZE; row++) {
+        if (!this.isCellEmpty(row, column)) {
+          nettoColumnValues.push(this.board[row][column]);
+        }
+      }
+      for (let row = 0; row < MATRIX_SIZE; row++) {
+        this.board[row][column] = 0;
+      }
+
+      for (
+        let insertCounter = 0;
+        insertCounter < nettoColumnValues.length;
+        insertCounter++
+      ) {
+        this.board[insertCounter][column] = nettoColumnValues[insertCounter];
+      }
+    }
+
+    //join cells
     this.dropAnotherNumber();
   }
 }

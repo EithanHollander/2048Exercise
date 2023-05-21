@@ -9,12 +9,19 @@ interface KeyboardEvent {
 
 const Container = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   height: 410px;
   width: 410px;
+`;
+
+const Row = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 `;
 
 const Cell = styled.div`
@@ -30,7 +37,6 @@ const Cell = styled.div`
 const Matrix = observer(() => {
   useEffect(() => {
     matrixStore.init();
-    console.log(matrixStore.board);
   }, []);
 
   useEffect(() => {
@@ -59,15 +65,17 @@ const Matrix = observer(() => {
 
   return (
     <Container>
-      {matrixStore.board.map((row, index) => {
+      {matrixStore.board.map((row, rowIndex) => {
         return (
-          <div key={index}>
-            {row.map((cellValue, index) => {
+          <Row key={rowIndex}>
+            {row.map((cellValue, columnIndex) => {
               return (
-                <Cell key={index}>{cellValue === 0 ? null : cellValue}</Cell>
+                <Cell key={columnIndex}>
+                  {cellValue === 0 ? null : cellValue}
+                </Cell>
               );
             })}
-          </div>
+          </Row>
         );
       })}
     </Container>

@@ -3,6 +3,10 @@ import { observer } from "mobx-react-lite";
 import matrixStore from "../stores/MatrixStore";
 import styled from "styled-components";
 
+interface KeyboardEvent {
+  key: string;
+}
+
 const Container = styled.div`
   display: flex;
   flex-direction: row;
@@ -27,6 +31,30 @@ const Matrix = observer(() => {
   useEffect(() => {
     matrixStore.init();
     console.log(matrixStore.board);
+  }, []);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      console.log(event.key);
+      if (event.key === "ArrowRight") {
+        matrixStore.moveRight();
+      }
+      if (event.key === "ArrowLeft") {
+        matrixStore.moveLeft();
+      }
+      if (event.key === "ArrowDown") {
+        matrixStore.moveDown();
+      }
+      if (event.key === "ArrowUp") {
+        matrixStore.moveUp();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return function cleanup() {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   return (

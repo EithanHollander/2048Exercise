@@ -84,8 +84,6 @@ class MatrixStore {
   }
 
   moveRight() {
-    console.log("move right!");
-    //shift cells
     for (let row = 0; row < MATRIX_SIZE; row++) {
       // get this row's values
       const nettoRowValues = this.board[row].filter(
@@ -101,16 +99,34 @@ class MatrixStore {
         this.board[row][MATRIX_SIZE - insertCounter - 1] =
           nettoRowValues[nettoRowValues.length - insertCounter - 1];
       }
+
+      // join matching cells
+      let currentColumn = MATRIX_SIZE - 1;
+      while (currentColumn > 0 && !this.isCellEmpty(row, currentColumn - 1)) {
+        if (
+          this.board[row][currentColumn] === this.board[row][currentColumn - 1]
+        ) {
+          //couple match, join them
+          this.board[row][currentColumn] =
+            this.board[row][currentColumn] + this.board[row][currentColumn - 1];
+
+          // shift the rest of the numbers to the right
+          for (let i = currentColumn - 1; i >= 0; i--) {
+            if (i === 0) {
+              this.board[row][i] = 0;
+            } else {
+              this.board[row][i] = this.board[row][i - 1];
+            }
+          }
+        }
+        currentColumn -= 1;
+      }
     }
 
-    //join cells
     this.dropAnotherNumber();
   }
 
   moveLeft() {
-    console.log("move left!");
-
-    //shift cells
     for (let row = 0; row < MATRIX_SIZE; row++) {
       // get this row's values
       const nettoRowValues = this.board[row].filter(
@@ -125,27 +141,48 @@ class MatrixStore {
       ) {
         this.board[row][insertCounter] = nettoRowValues[insertCounter];
       }
-    }
+      // join matching cells
+      let currentColumn = 0;
+      while (
+        currentColumn < MATRIX_SIZE - 1 &&
+        !this.isCellEmpty(row, currentColumn + 1)
+      ) {
+        if (
+          this.board[row][currentColumn] === this.board[row][currentColumn + 1]
+        ) {
+          //couple match, join them
+          this.board[row][currentColumn] =
+            this.board[row][currentColumn] + this.board[row][currentColumn + 1];
 
-    //join cells
+          // shift the rest of the numbers to the left
+          for (let i = currentColumn + 1; i <= MATRIX_SIZE - 1; i++) {
+            if (i === MATRIX_SIZE - 1) {
+              this.board[row][i] = 0;
+            } else {
+              this.board[row][i] = this.board[row][i + 1];
+            }
+          }
+        }
+        currentColumn += 1;
+      }
+    }
     this.dropAnotherNumber();
   }
 
   moveDown() {
-    console.log("move down!");
-
-    //shift cells
     for (let column = 0; column < MATRIX_SIZE; column++) {
+      // get this column's values
       let nettoColumnValues: number[] = [];
       for (let row = 0; row < MATRIX_SIZE; row++) {
         if (!this.isCellEmpty(row, column)) {
           nettoColumnValues.push(this.board[row][column]);
         }
       }
+
+      // put all values at the bottom
       for (let row = 0; row < MATRIX_SIZE; row++) {
         this.board[row][column] = 0;
       }
-
       for (
         let insertCounter = 0;
         insertCounter < nettoColumnValues.length;
@@ -154,26 +191,46 @@ class MatrixStore {
         this.board[MATRIX_SIZE - insertCounter - 1][column] =
           nettoColumnValues[nettoColumnValues.length - insertCounter - 1];
       }
-    }
 
-    //join cells
+      // join matching cells
+      let currentRow = MATRIX_SIZE - 1;
+      while (currentRow > 0 && !this.isCellEmpty(currentRow - 1, column)) {
+        if (
+          this.board[currentRow][column] === this.board[currentRow - 1][column]
+        ) {
+          //couple match, join them
+          this.board[currentRow][column] =
+            this.board[currentRow][column] + this.board[currentRow - 1][column];
+
+          // shift the rest of the numbers down
+          for (let i = currentRow - 1; i >= 0; i--) {
+            if (i === 0) {
+              this.board[i][column] = 0;
+            } else {
+              this.board[i][column] = this.board[i - 1][column];
+            }
+          }
+        }
+        currentRow -= 1;
+      }
+    }
     this.dropAnotherNumber();
   }
 
   moveUp() {
-    console.log("move up!");
-    //shift cells
     for (let column = 0; column < MATRIX_SIZE; column++) {
+      // get this column's values
       let nettoColumnValues: number[] = [];
       for (let row = 0; row < MATRIX_SIZE; row++) {
         if (!this.isCellEmpty(row, column)) {
           nettoColumnValues.push(this.board[row][column]);
         }
       }
+
+      // put all values at the top
       for (let row = 0; row < MATRIX_SIZE; row++) {
         this.board[row][column] = 0;
       }
-
       for (
         let insertCounter = 0;
         insertCounter < nettoColumnValues.length;
@@ -181,9 +238,32 @@ class MatrixStore {
       ) {
         this.board[insertCounter][column] = nettoColumnValues[insertCounter];
       }
-    }
 
-    //join cells
+      // join matching cells
+      let currentRow = 0;
+      while (
+        currentRow < MATRIX_SIZE - 1 &&
+        !this.isCellEmpty(currentRow + 1, column)
+      ) {
+        if (
+          this.board[currentRow][column] === this.board[currentRow + 1][column]
+        ) {
+          //couple match, join them
+          this.board[currentRow][column] =
+            this.board[currentRow][column] + this.board[currentRow + 1][column];
+
+          // shift the rest of the numbers up
+          for (let i = currentRow + 1; i <= MATRIX_SIZE - 1; i++) {
+            if (i === MATRIX_SIZE - 1) {
+              this.board[i][column] = 0;
+            } else {
+              this.board[i][column] = this.board[i + 1][column];
+            }
+          }
+        }
+        currentRow += 1;
+      }
+    }
     this.dropAnotherNumber();
   }
 }

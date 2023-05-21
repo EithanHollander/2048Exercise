@@ -1,6 +1,7 @@
 import { makeAutoObservable } from "mobx";
 
 const MATRIX_SIZE = 4;
+const MAX_CELL_VALUE = 2048;
 
 const getRandomNumber = (max: number): number => {
   return Math.floor(Math.random() * max);
@@ -27,18 +28,21 @@ type Coordinate = {
 
 class MatrixStore {
   board: number[][];
+  triedToAddToFullBoard: boolean;
 
   constructor() {
     makeAutoObservable(this);
     this.board = Array(MATRIX_SIZE)
       .fill(0)
       .map((_row) => new Array(MATRIX_SIZE).fill(0));
+    this.triedToAddToFullBoard = false;
   }
 
   init() {
     this.board = Array(MATRIX_SIZE)
       .fill(0)
       .map((_row) => new Array(MATRIX_SIZE).fill(0));
+    this.triedToAddToFullBoard = false;
 
     let randomRow = getRandomNumberForMatrix(MATRIX_SIZE);
     let randomColumn = getRandomNumberForMatrix(MATRIX_SIZE);
@@ -50,6 +54,13 @@ class MatrixStore {
       randomColumn
     );
     this.board[anotherRandomRow][anotherRandomColumn] = 2;
+  }
+
+  get isGameOver() {
+    const maxNumberExists = this.board.some((row) => {
+      return row.some((cell) => cell === MAX_CELL_VALUE);
+    });
+    return maxNumberExists || this.triedToAddToFullBoard;
   }
 
   isCellEmpty(row: number, column: number) {
@@ -77,13 +88,14 @@ class MatrixStore {
   dropAnotherNumber() {
     const { row, column } = this.chooseRandomEmptyCell();
     if (row === -1 && column === -1) {
-      alert("NO MORE SPACE!");
+      this.triedToAddToFullBoard = true;
     } else {
       this.board[row][column] = 2;
     }
   }
 
   moveRight() {
+    if (this.isGameOver) return;
     for (let row = 0; row < MATRIX_SIZE; row++) {
       // get this row's values
       const nettoRowValues = this.board[row].filter(
@@ -127,6 +139,7 @@ class MatrixStore {
   }
 
   moveLeft() {
+    if (this.isGameOver) return;
     for (let row = 0; row < MATRIX_SIZE; row++) {
       // get this row's values
       const nettoRowValues = this.board[row].filter(
@@ -170,6 +183,7 @@ class MatrixStore {
   }
 
   moveDown() {
+    if (this.isGameOver) return;
     for (let column = 0; column < MATRIX_SIZE; column++) {
       // get this column's values
       let nettoColumnValues: number[] = [];
@@ -218,6 +232,7 @@ class MatrixStore {
   }
 
   moveUp() {
+    if (this.isGameOver) return;
     for (let column = 0; column < MATRIX_SIZE; column++) {
       // get this column's values
       let nettoColumnValues: number[] = [];

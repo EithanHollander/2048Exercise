@@ -130,7 +130,7 @@ class MatrixStore {
           // shift the rest of the numbers to the right
           for (let i = currentColumn - 1; i >= 0; i--) {
             if (i === 0) {
-              this.board[row][i] = 0;
+              this.board[row][i] = CELL_EMPTY_VALUE;
             } else {
               this.board[row][i] = this.board[row][i - 1];
             }
@@ -170,7 +170,7 @@ class MatrixStore {
           // shift the rest of the numbers to the left
           for (let i = currentColumn + 1; i <= MATRIX_SIZE - 1; i++) {
             if (i === MATRIX_SIZE - 1) {
-              this.board[row][i] = 0;
+              this.board[row][i] = CELL_EMPTY_VALUE;
             } else {
               this.board[row][i] = this.board[row][i + 1];
             }
@@ -215,7 +215,7 @@ class MatrixStore {
           // shift the rest of the numbers down
           for (let i = currentRow - 1; i >= 0; i--) {
             if (i === 0) {
-              this.board[i][column] = 0;
+              this.board[i][column] = CELL_EMPTY_VALUE;
             } else {
               this.board[i][column] = this.board[i - 1][column];
             }
@@ -259,7 +259,7 @@ class MatrixStore {
           // shift the rest of the numbers up
           for (let i = currentRow + 1; i <= MATRIX_SIZE - 1; i++) {
             if (i === MATRIX_SIZE - 1) {
-              this.board[i][column] = 0;
+              this.board[i][column] = CELL_EMPTY_VALUE;
             } else {
               this.board[i][column] = this.board[i + 1][column];
             }
